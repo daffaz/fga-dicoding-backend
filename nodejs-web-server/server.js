@@ -5,45 +5,57 @@ const http = require('http')
  * @param response: objek yang digunakan untuk menanggapi permintaan
  */
 const requestListener = (request, response) => {
-    const method = request.method
-    const url = request.url
+    response.setHeader('Content-Type', 'application/json');
+    response.setHeader('X-Powered-By', 'NodeJS');
+
+    const { method, url } = request;
 
     if (url === '/') {
         if (method === 'GET') {
-            response.statusCode = 200
-            response.setHeader('Content-Type', 'text/html')
-            response.end('Ini adalah homepage')
+            response.statusCode = 200;
+            response.end(JSON.stringify({
+                message: 'Ini adalah homepage',
+            }));
         } else {
-            response.end('Halaman tidak dapat diakses dengan <any> request')
+            response.statusCode = 400;
+            response.end(JSON.stringify({
+                message: `Halaman tidak dapat diakses dengan ${method} request`,
+            }));
         }
-        return
-    }
-
-    if (url === '/about') {
+    } else if (url === '/about') {
         if (method === 'GET') {
-            response.statusCode = 200
-            response.setHeader('Content-Type', 'text/html')
-            response.end('Ini adalah about page')
+            response.statusCode = 200;
+            response.end(JSON.stringify({
+                message: 'Halo! Ini adalah halaman about',
+            }));
         } else if (method === 'POST') {
-            let body = []
+            let body = [];
 
-            request.on('data', chunk => {
-                body.push(chunk)
-            })
+            request.on('data', (chunk) => {
+                body.push(chunk);
+            });
 
             request.on('end', () => {
-                body = Buffer.concat(body).toString()
-                const { name } = JSON.parse(body)
-                response.end(`Hallo ${name}, welcome to about page`)
-            })
+                body = Buffer.concat(body).toString();
+                const { name } = JSON.parse(body);
+                response.statusCode = 200;
+                response.end(JSON.stringify({
+                    message: `Halo, ${name}! Ini adalah halaman about`,
+                }));
+            });
         } else {
-            response.end('Halaman tidak dapat diakses dengan <any> request')
+            response.statusCode = 400;
+            response.end(JSON.stringify({
+                message: `Halaman tidak dapat diakses menggunakan ${method}, request`
+            }));
         }
-        return
+    } else {
+        response.statusCode = 404;
+        response.end(JSON.stringify({
+            message: 'Halaman tidak ditemukan!',
+        }));
     }
-
-    response.end('Not found')
-}
+};
 
 const server = http.createServer(requestListener)
 server.listen(4000, () => {
