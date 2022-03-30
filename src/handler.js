@@ -69,6 +69,7 @@ const updateNoteByIDHandler = (request, h) => {
     noteFound.title = title;
     noteFound.tags = tags;
     noteFound.body = body;
+    noteFound.updatedAt = new Date().toISOString();
 
     return h.response({
       status: 'success',
