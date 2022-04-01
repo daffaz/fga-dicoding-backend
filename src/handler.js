@@ -74,7 +74,7 @@ const updateNoteByIDHandler = (request, h) => {
     return h.response({
       status: 'success',
       message: 'Catatan berhasil diperbaharui',
-      data: noteFound,
+      data: { note: noteFound },
     });
   }
 
