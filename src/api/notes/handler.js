@@ -1,5 +1,5 @@
 const { nanoid } = require('nanoid');
-const notes = require('./notes');
+const notes = require('../../notes');
 
 const helperFindNoteByID = (id) => notes.find((note) => note.id === id);
 
@@ -73,7 +73,7 @@ const updateNoteByIDHandler = (request, h) => {
 
     return h.response({
       status: 'success',
-      message: 'Catatan berhasil diperbaharui',
+      message: 'Catatan berhasil diperbarui',
       data: { note: noteFound },
     });
   }
