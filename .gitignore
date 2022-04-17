@@ -5,3 +5,4 @@ node_modules/
 .prod.env
 .gitignore
 notes-api-webserver.pem
+notes-backend.pem
