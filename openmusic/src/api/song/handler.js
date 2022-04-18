@@ -6,20 +6,46 @@ class NotesHandler {
     this.validator = validator;
 
     // binding this
-    this.getAlbumByIdHandler = this.getAlbumByIdHandler.bind(this);
-    this.postAlbumHandler = this.postAlbumHandler.bind(this);
-    this.putAlbumByIdHandler = this.putAlbumByIdHandler.bind(this);
-    this.deleteAlbumByIdHandler = this.deleteAlbumByIdHandler.bind(this);
+    this.getSongByIdHandler = this.getSongByIdHandler.bind(this);
+    this.postSongHandler = this.postSongHandler.bind(this);
+    this.putSongByIdHandler = this.putSongByIdHandler.bind(this);
+    this.deleteSongByIdHandler = this.deleteSongByIdHandler.bind(this);
+    this.getAllSongHandler = this.getAllSongHandler.bind(this);
   }
 
-  async postAlbumHandler(request, h) {
+  async getAllSongHandler(request, h) {
+    const { title, performer } = request.query;
+    const songs = await this.service.allSong({ title, performer });
+    return h.response({
+      status: 'success',
+      data: {
+        songs,
+      },
+    });
+  }
+
+  async postSongHandler(request, h) {
     try {
-      this.validator.validateAlbumPayload(request.payload);
-      const { name, year } = request.payload;
-      const albumId = await this.service.addAlbum({ name, year });
+      this.validator.validateSongPayload(request.payload);
+      const {
+        title,
+        year,
+        genre,
+        performer,
+        duration = 0,
+        albumId = '',
+      } = request.payload;
+      const songId = await this.service.addSong({
+        title,
+        year,
+        genre,
+        performer,
+        duration,
+        albumId,
+      });
       return h.response({
         status: 'success',
-        data: { albumId },
+        data: { songId },
       }).code(201);
     } catch (error) {
       if (error instanceof ClientError) {
@@ -37,17 +63,15 @@ class NotesHandler {
     }
   }
 
-  async getAlbumByIdHandler(request, h) {
+  async getSongByIdHandler(request, h) {
     try {
       const { id } = request.params;
-      const { album, song } = await this.service.getSongsByAlbumId(id);
+      const song = await this.service.getSongById(id);
+
       return h.response({
         status: 'success',
         data: {
-          album: {
-            ...album,
-            songs: song,
-          },
+          song,
         },
       });
     } catch (error) {
@@ -66,16 +90,30 @@ class NotesHandler {
     }
   }
 
-  async putAlbumByIdHandler(request, h) {
+  async putSongByIdHandler(request, h) {
     try {
-      this.validator.validateAlbumPayload(request.payload);
+      this.validator.validateSongPayload(request.payload);
       const { id } = request.params;
-      const { name, year } = request.payload;
+      const {
+        title,
+        year,
+        genre,
+        performer,
+        duration = 0,
+        albumId = '',
+      } = request.payload;
 
-      await this.service.editAlbumById(id, { name, year });
+      await this.service.editSongById(id, {
+        title,
+        year,
+        genre,
+        performer,
+        duration,
+        albumId,
+      });
       return h.response({
         status: 'success',
-        message: 'successfully updated the album',
+        message: 'successfully updated the song',
       });
     } catch (error) {
       if (error instanceof ClientError) {
@@ -92,13 +130,13 @@ class NotesHandler {
     }
   }
 
-  async deleteAlbumByIdHandler(request, h) {
+  async deleteSongByIdHandler(request, h) {
     try {
       const { id } = request.params;
-      await this.service.deleteAlbumById(id);
+      await this.service.deleteSongById(id);
       return h.response({
         status: 'success',
-        message: 'successfully deleted the album',
+        message: 'successfully deleted the song',
       });
     } catch (error) {
       if (error instanceof ClientError) {
