@@ -1,12 +1,19 @@
 const Hapi = require('@hapi/hapi');
+const Jwt = require('@hapi/jwt');
+
+// notes
 const notes = require('./api/notes');
-const users = require('./api/users');
-const authentications = require('./api/authentications');
-const UserService = require('./services/postgres/UsersService');
 const NoteService = require('./services/postgres/NotesService');
-const AuthenticationsService = require('./services/postgres/AuthenticationsService');
 const NotesValidator = require('./validator/notes');
+
+// users
+const users = require('./api/users');
 const UsersValidator = require('./validator/users');
+const UserService = require('./services/postgres/UsersService');
+
+// auth
+const authentications = require('./api/authentications');
+const AuthenticationsService = require('./services/postgres/AuthenticationsService');
 const AuthenticationsValidator = require('./validator/authentications');
 
 const TokenManager = require('./tokenize/TokenManager');
@@ -25,6 +32,29 @@ const init = async () => {
         origin: ['http://notesapp-v1.dicodingacademy.com'],
       },
     },
+  });
+
+  // external plugin
+  await server.register([
+    {
+      plugin: Jwt,
+    },
+  ]);
+
+  server.auth.strategy('notesapp_jwt', 'jwt', {
+    keys: process.env.ACCESS_TOKEN_KEY,
+    verify: {
+      aud: false,
+      iss: false,
+      sub: false,
+      maxAgeSec: process.env.ACCESS_TOKEN_AGE,
+    },
+    validate: (artifacts) => ({
+      isValid: true,
+      credentials: {
+        id: artifacts.decoded.payload.id,
+      },
+    }),
   });
 
   await server.register([
