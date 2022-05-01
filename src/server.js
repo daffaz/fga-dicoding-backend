@@ -15,13 +15,18 @@ const UserService = require('./services/postgres/UsersService');
 const authentications = require('./api/authentications');
 const AuthenticationsService = require('./services/postgres/AuthenticationsService');
 const AuthenticationsValidator = require('./validator/authentications');
-
 const TokenManager = require('./tokenize/TokenManager');
+
+// collaborations
+const collaborations = require('./api/collaborations');
+const CollaborationsService = require('./services/postgres/CollaborationsService');
+const CollaborationsValidator = require('./validator/collaborations');
 
 require('dotenv').config();
 
 const init = async () => {
-  const noteService = new NoteService();
+  const collaborationsService = new CollaborationsService();
+  const noteService = new NoteService(collaborationsService);
   const userService = new UserService();
   const authenticationService = new AuthenticationsService();
   const server = Hapi.server({
@@ -29,7 +34,7 @@ const init = async () => {
     host: process.env.HOST,
     routes: {
       cors: {
-        origin: ['http://notesapp-v1.dicodingacademy.com'],
+        origin: ['http://notesapp-v2.dicodingacademy.com'],
       },
     },
   });
@@ -79,6 +84,14 @@ const init = async () => {
         userService,
         tokenManager: TokenManager,
         validator: AuthenticationsValidator,
+      },
+    },
+    {
+      plugin: collaborations,
+      options: {
+        collaborationsService,
+        noteService,
+        validator: CollaborationsValidator,
       },
     },
   ]);
