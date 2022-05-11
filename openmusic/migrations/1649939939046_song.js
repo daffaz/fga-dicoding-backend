@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 
 exports.up = (pgm) => {
-  pgm.createTable('song', {
+  pgm.createTable('songs', {
     id: {
       type: 'VARCHAR(50)',
       primaryKey: true,
@@ -29,8 +29,10 @@ exports.up = (pgm) => {
       type: 'TEXT',
     },
   });
+
+  pgm.addConstraint('songs', 'fk_songs.album_id_album.id', 'FOREIGN KEY(album_id) REFERENCES song(id) ON DELETE CASCADE');
 };
 
 exports.down = (pgm) => {
-  pgm.dropTable('song');
+  pgm.dropTable('songs');
 };

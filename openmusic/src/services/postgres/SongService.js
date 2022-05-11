@@ -43,7 +43,7 @@ class SongService {
     duration,
     albumId,
   }) {
-    const id = nanoid(15);
+    const id = `song-${nanoid(15)}`;
     const query = {
       text: 'INSERT INTO song VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
       values: [id, title, year, genre, performer, duration, albumId],
